@@ -10,22 +10,24 @@
         {
             var countIter = 30;
             var remainingWorkThread = countIter;
-            var context = new ThreadQueue(8);
 
-            using (var mre = new ManualResetEvent(false))
+            using (var context = new ThreadQueue(8))
             {
-                for (var i = 0; i < countIter; i++)
+                using (var mre = new ManualResetEvent(false))
                 {
-                    var index = i;
+                    for (var i = 0; i < countIter; i++)
+                    {
+                        var index = i;
 
-                    context.Enqueue(() => { Console.WriteLine(index); });
+                        context.Enqueue(() => { Console.WriteLine(index); });
 
-                    if (Interlocked.Decrement(ref remainingWorkThread) == 0)
-                        mre.Set();
+                        if (Interlocked.Decrement(ref remainingWorkThread) == 0)
+                            mre.Set();
+                    }
+
+                    // Wait for all threads to complete.
+                    mre.WaitOne();
                 }
-
-                // Wait for all threads to complete.
-                mre.WaitOne();
             }
         }
     }
