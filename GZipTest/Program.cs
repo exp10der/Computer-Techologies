@@ -8,7 +8,7 @@
     {
         private static void Main(string[] args)
         {
-            var countIter = 30;
+            var countIter = 40;
             var remainingWorkThread = countIter;
 
             using (var context = new ThreadQueue(8))
