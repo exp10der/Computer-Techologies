@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
 
-    internal class ThreadQueue
+    internal class ThreadQueue : IDisposable
     {
         private const int _boundedCapacity = 8;
         private readonly BlockingQueue<Action> _task;

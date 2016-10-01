@@ -2,47 +2,116 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
 
     internal class BlockingQueue<T> : IDisposable
     {
         private readonly Queue<T> _queue;
         private readonly object _queueLockObject = new object();
+        private Semaphore _itemsAvailable;
+        private Semaphore _spaceAvailable;
 
         public BlockingQueue(int size)
         {
-            Initialize();
+            Initialize(size);
+
+            _queue = new Queue<T>(size);
         }
+
+        public bool IsClosed { get; private set; }
 
         void IDisposable.Dispose()
         {
-            throw new NotImplementedException();
+            if (_itemsAvailable == null) return;
+            _itemsAvailable.Close();
+            _spaceAvailable.Close();
+            _itemsAvailable = null;
         }
 
-        private void Initialize()
+        private void Initialize(int size)
         {
-            throw new NotImplementedException();
+            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "Must be greater than zero.");
+
+            _itemsAvailable = new Semaphore(0, size);
+            _spaceAvailable = new Semaphore(size, size);
         }
 
         public void Add(T data)
         {
-            throw new NotImplementedException();
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            //Wait if the collection is full
+            _spaceAvailable.WaitOne();
+
+            lock (_queueLockObject)
+            {
+                if (IsClosed) throw new InvalidOperationException(nameof(IsClosed));
+                _queue.Enqueue(data);
+            }
+            _itemsAvailable.Release();
         }
 
         public T Dequeue()
         {
-            throw new NotImplementedException();
+            T item;
+
+            if (_queue.Count == 0 && IsClosed)
+                throw new InvalidOperationException(nameof(IsClosed));
+
+            _itemsAvailable.WaitOne();
+
+            lock (_queueLockObject)
+            {
+                if (_queue.Count == 0 && IsClosed)
+                {
+                    _itemsAvailable.Release();
+                    throw new InvalidOperationException(nameof(IsClosed));
+                }
+
+                item = _queue.Dequeue();
+            }
+
+            _spaceAvailable.Release();
+            return item;
         }
 
         public IEnumerable<T> GetConsumingEnumerable()
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                T item;
+
+                try
+                {
+                    item = Dequeue();
+                }
+                catch
+                {
+                    break;
+                }
+                yield return item;
+            }
         }
 
-        public object SyncRoot() => _queueLockObject;
+        protected object SyncRoot() => _queueLockObject;
 
         public void CompleteAdding()
         {
-            throw new NotImplementedException();
+            if (IsClosed) return;
+            lock (_queueLockObject)
+            {
+                IsClosed = true;
+
+                // 55 line code, any waiting blocked threads need to get access to find out the queue is closed
+                try
+                {
+                    _itemsAvailable.Release();
+                }
+                catch (SemaphoreFullException)
+                {
+                    // ...
+                }
+            }
         }
     }
 }
