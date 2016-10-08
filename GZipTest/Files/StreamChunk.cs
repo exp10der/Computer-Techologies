@@ -24,12 +24,11 @@
             var offset = input.Position;
             using (var ms = new MemoryStream(chunkLength))
             {
-                if (input.CopyBytesToOut(chunkLength, ms))
+                if (input.MoveStreamData(chunkLength, ms))
                     return false;
 
-
                 var buffer = ms.GetBuffer();
-                var msLength = (int)ms.Length;
+                var msLength = (int) ms.Length;
                 if (buffer.Length == msLength)
                     chunk = new Chunk(buffer, offset);
                 else
@@ -42,11 +41,20 @@
             }
         }
 
+        
         //NOTE: false = EOF
-        public static bool CopyBytesToOut(this Stream input, long bytesToRead, Stream output)
+        public static bool MoveStreamData(this Stream input, int bytesMove, Stream output)
         {
             var buffer = new byte[BufferSize];
-            throw new NotImplementedException();
+            int remaining = bytesMove, bytesRead;
+            while (remaining > 0 && (bytesRead = input.Read(buffer, 0,
+                Math.Min(remaining, BufferSize))) > 0)
+            {
+                output.Write(buffer, 0, bytesRead);
+                remaining -= bytesRead;
+            }
+
+            return output.Length > 0;
         }
     }
 }
