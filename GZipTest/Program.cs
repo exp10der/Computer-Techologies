@@ -1,7 +1,9 @@
 ﻿namespace GZipTest
 {
     using System.Collections.Generic;
+    using Dataflow;
     using Files;
+    using Infrastructure;
     using Models;
 
     internal class Program
@@ -19,15 +21,13 @@
             using (var input = File.OpenRead(@"\\?\C:\Work\Node.js Design Patterns - Second Edition.pdf", 4096, false))
             using (var output = File.OpenWrite(@"\\?\C:\Work\Node.js Design Patterns - Second Edition.gz", 4096, false))
             {
-                //IEnumerable<Chunk> compressor = StreamChunk.SplitStream(input, 64 * 1024).Transform(chunk => Compress(chunk));
+                IEnumerable<Chunk> compressor = StreamChunk.SplitStream(input, 64*1024).Transform(Compressor.Compress);
 
-                //foreach (var compressedChunk in compressor)
-                //{
-                //    compressedChunk.Write(output);
-                //}
+                foreach (var compressedChunk in compressor)
+                {
+                    compressedChunk.Write(output);
+                }
             }
-
-
         }
     }
 }
