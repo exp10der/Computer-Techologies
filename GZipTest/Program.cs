@@ -1,5 +1,8 @@
 ﻿namespace GZipTest
 {
+    using System.IO;
+    using Files;
+
     internal class Program
     {
         //  C:\Work\Node.js Design Patterns - Second Edition.pdf
@@ -12,7 +15,18 @@
 
         private static void Main(string[] args)
         {
-            var test = Files.File.OpenRead(@"\\?\C:\Work\Node.js Design Patterns - Second Edition.pdf", 4096, false);
+            var input = Files.File.OpenRead(@"\\?\C:\Work\Node.js Design Patterns - Second Edition.pdf", 4096, false);
+            var output = (FileStream)null;
+
+            var compressor = StreamChunk.SplitStream(input, 64*1024).Transform(chunk => Compress(chunk));
+
+            foreach (var compressedChunk in compressor)
+            {
+                compressedChunk.Write(output);
+            }
+            
+            input.Close();
+            output.Close();
 
         }
     }
