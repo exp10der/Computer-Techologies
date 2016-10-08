@@ -11,10 +11,10 @@
     {
         public static FileStream OpenRead(string path, int bufferSize, bool sequential)
         {
-            return OpenRead(path, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, sequential);
+            return Create(path, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, sequential);
         }
 
-        private static FileStream OpenRead(string path, FileMode mode, FileAccess access, FileShare share,
+        private static FileStream Create(string path, FileMode mode, FileAccess access, FileShare share,
             int bufferSize, bool sequential)
         {
             return new FileStream(CreateFileHandle(path, mode, access, share, sequential), access, bufferSize, false);
@@ -36,6 +36,11 @@
             throw new Win32Exception(
                 lastWin32Error,
                 $"Error {lastWin32Error} creating file handle for file path '{path}': {new Win32Exception(lastWin32Error).Message}");
+        }
+
+        public static FileStream OpenWrite(string path, int bufferSize, bool sequential)
+        {
+            return Create(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, sequential);
         }
     }
 }
