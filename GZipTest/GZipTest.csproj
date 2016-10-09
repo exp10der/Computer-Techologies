@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dataflow\ActionBlock.cs" />
     <Compile Include="Dataflow\CompressorFlow.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\StreamChunk.cs" />
