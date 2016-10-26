@@ -15,8 +15,17 @@
 
             // https://msdn.microsoft.com/en-us/library/ff963548.aspx
             var actionBlock = new ActionBlock<Chunk>(source, 8, onError);
-            
-            throw new NotImplementedException();
+            var transformBlock = new TransformBlock<Chunk, Chunk>(actionBlock.LinkTo(), 12, onError);
+
+            foreach (var compressed in transformBlock.Consume(compressSelector))
+            {
+                if (error != null) break;
+
+                yield return compressed;
+            }
+
+            if (error != null)
+                throw error;
         }
     }
 }

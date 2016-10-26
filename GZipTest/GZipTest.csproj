@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Dataflow\ActionBlock.cs" />
     <Compile Include="Dataflow\CompressorFlow.cs" />
+    <Compile Include="Dataflow\TransformBlock.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\StreamChunk.cs" />
     <Compile Include="Infrastructure\Compressor.cs" />

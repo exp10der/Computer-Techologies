@@ -24,7 +24,7 @@
             var offset = input.Position;
             using (var ms = new MemoryStream(chunkLength))
             {
-                if (input.MoveStreamData(chunkLength, ms))
+                if (!input.MoveStreamData(chunkLength, ms))
                     return false;
 
                 var buffer = ms.GetBuffer();

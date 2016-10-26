@@ -85,7 +85,7 @@
                 {
                     item = Dequeue();
                 }
-                catch
+                catch (Exception e) when (e is InvalidOperationException)
                 {
                     break;
                 }
